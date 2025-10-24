@@ -1,8 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { SupabaseService } from '../supabase/supabase.service';
 
 @Injectable()
 export class UsersService {
-  getUsers() {
-    return ['User1', 'User2', 'User3'];
+  constructor(private readonly supabaseService: SupabaseService) {}
+
+  async getAll() {
+    const supabase = this.supabaseService.getClient();
+    const { data, error } = await supabase.from('users').select('*');
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async create(user: { name: string; email: string }) {
+    const supabase = this.supabaseService.getClient();
+    const { data, error } = await supabase.from('users').insert([user]).select();
+    if (error) throw new Error(error.message);
+    return data[0];
   }
 }
